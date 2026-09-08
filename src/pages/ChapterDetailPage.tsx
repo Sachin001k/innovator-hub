@@ -1,12 +1,12 @@
 import { motion } from "framer-motion";
 import { PlayCircle, Trophy, ArrowLeft } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
 import PageLayout from "@/components/PageLayout";
 import ImageViewer, { GalleryImage } from "@/components/ImageViewer";
 import VideoModal from "@/components/VideoModal";
-import { getChapter } from "@/lib/chaptersStore";
-import type { ChapterVideo } from "@/data/chaptersData";
+import { getChapter, getChapterAsync } from "@/lib/chaptersStore";
+import type { ChapterData, ChapterVideo } from "@/data/chaptersData";
 
 // ── Reel card ─────────────────────────────────────────────────────────────────
 function ReelCard({
@@ -60,10 +60,14 @@ function ReelCard({
 // ── Main page ─────────────────────────────────────────────────────────────────
 const ChapterDetailPage = () => {
   const { id } = useParams<{ id: string }>();
-  const chapter = id ? getChapter(id) : undefined;
-
+  const [chapter, setChapter] = useState(() => (id ? getChapter(id) : undefined));
   const [activeVideo, setActiveVideo] = useState<ChapterVideo | null>(null);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!id) return;
+    getChapterAsync(id).then(ch => setChapter(ch));
+  }, [id]);
 
   if (!chapter) return <Navigate to="/chapters" replace />;
 

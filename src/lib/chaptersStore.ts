@@ -6,8 +6,11 @@ import {
   type GalleryImageItem,
   type ChapterAward,
 } from "@/data/chaptersData";
+import { saveChapterData, getChapterDataFromDB, getAllChaptersFromDB } from "./supabase";
 
 const STORAGE_KEY = "projectzul_chapters_v1";
+let supabaseCache: Record<string, ChapterOverrides> | null = null;
+let supabaseCacheLoaded = false;
 
 // ─── Stored override shape ─────────────────────────────────────────────────────
 
@@ -34,11 +37,34 @@ function load(): StoredState {
   }
 }
 
+export async function loadFromSupabase(): Promise<StoredState> {
+  try {
+    const dbData = await getAllChaptersFromDB();
+    supabaseCache = dbData;
+    supabaseCacheLoaded = true;
+    console.log("[chaptersStore] Loaded from Supabase:", Object.keys(dbData).length, "chapters", dbData);
+    return dbData;
+  } catch (error) {
+    console.error("[chaptersStore] Failed to load from Supabase, falling back to localStorage:", error);
+    supabaseCacheLoaded = true;
+    return load();
+  }
+}
+
 function save(state: StoredState): void {
   try {
     const json = JSON.stringify(state);
     localStorage.setItem(STORAGE_KEY, json);
     console.log("[chaptersStore] Saved to localStorage:", { key: STORAGE_KEY, size: json.length });
+
+    // Also save to Supabase for each chapter
+    console.log("[chaptersStore] Saving to Supabase for chapters:", Object.keys(state));
+    Object.entries(state).forEach(([chapterId, overrides]) => {
+      console.log(`[chaptersStore] Attempting to save ${chapterId} to Supabase`, overrides);
+      saveChapterData(chapterId, overrides)
+        .then(success => console.log(`[chaptersStore] Supabase save ${chapterId}: ${success}`))
+        .catch(err => console.error(`[chaptersStore] Failed to save ${chapterId} to Supabase:`, err));
+    });
   } catch (error) {
     console.error("[chaptersStore] Failed to save to localStorage:", error);
   }
@@ -85,6 +111,19 @@ export function getChapter(id: string): ChapterData | undefined {
   const base = defaultChapters.find((c) => c.id === id);
   if (!base) return undefined;
   const overrides = load();
+  return merge(base, overrides[id]);
+}
+
+// Async versions that load from Supabase
+export async function getChaptersAsync(): Promise<ChapterData[]> {
+  const overrides = await loadFromSupabase();
+  return defaultChapters.map((c) => merge(c, overrides[c.id]));
+}
+
+export async function getChapterAsync(id: string): Promise<ChapterData | undefined> {
+  const base = defaultChapters.find((c) => c.id === id);
+  if (!base) return undefined;
+  const overrides = await loadFromSupabase();
   return merge(base, overrides[id]);
 }
 
