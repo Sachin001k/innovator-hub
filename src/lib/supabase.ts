@@ -135,3 +135,74 @@ export const getAllChaptersFromDB = async (): Promise<Record<string, any>> => {
     return {};
   }
 };
+
+// ── Site content storage (home page, partners, events) ─────────────────────────
+
+export const getAllSiteContentFromDB = async (): Promise<Record<string, any>> => {
+  try {
+    const { data, error } = await supabase.from("site_content").select("key, data");
+
+    if (error) {
+      console.error("[Supabase] Error fetching site content:", error);
+      return {};
+    }
+
+    const result: Record<string, any> = {};
+    data?.forEach((row) => {
+      result[row.key] = row.data;
+    });
+    return result;
+  } catch (error) {
+    console.error("[Supabase] Unexpected error fetching site content:", error);
+    return {};
+  }
+};
+
+export const saveSiteContentToDB = async (key: string, data: unknown): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from("site_content")
+      .upsert({ key, data, updated_at: new Date().toISOString() }, { onConflict: "key" });
+
+    if (error) {
+      console.error(`[Supabase] Error saving site content ${key}:`, error);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error(`[Supabase] Unexpected error saving site content ${key}:`, error);
+    return false;
+  }
+};
+
+// ── Media uploads (Supabase Storage) ───────────────────────────────────────────
+
+export const MEDIA_BUCKET = "site-media";
+
+/** Uploads a file to the public media bucket and returns its public URL, or null on failure. */
+export const uploadMedia = async (file: File, folder: string): Promise<string | null> => {
+  try {
+    const ext = file.name.includes(".") ? file.name.split(".").pop()!.toLowerCase() : "bin";
+    const base = file.name
+      .replace(/\.[^.]+$/, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 40);
+    const path = `${folder}/${Date.now()}-${base || "file"}.${ext}`;
+
+    const { error } = await supabase.storage
+      .from(MEDIA_BUCKET)
+      .upload(path, file, { contentType: file.type || undefined, upsert: false });
+
+    if (error) {
+      console.error("[Supabase] Error uploading media:", error);
+      return null;
+    }
+
+    return supabase.storage.from(MEDIA_BUCKET).getPublicUrl(path).data.publicUrl;
+  } catch (error) {
+    console.error("[Supabase] Unexpected error uploading media:", error);
+    return null;
+  }
+};

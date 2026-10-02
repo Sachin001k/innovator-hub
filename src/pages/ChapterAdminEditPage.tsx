@@ -1,8 +1,9 @@
-import { useState, useId } from "react";
+import { useState } from "react";
 import { ArrowLeft, Eye, EyeOff, Trash2, Plus, Save, ExternalLink } from "lucide-react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import PageLayout from "@/components/PageLayout";
 import { Button } from "@/components/ui/button";
+import { AdminCard, Field, MediaField } from "@/components/admin/AdminUI";
 import {
   getChapter,
   updateSections,
@@ -22,90 +23,6 @@ import type {
   GalleryImageItem,
   ChapterAward,
 } from "@/data/chaptersData";
-
-// ─── Small toggle switch ──────────────────────────────────────────────────────
-function Toggle({
-  checked,
-  onChange,
-  label,
-}: {
-  checked: boolean;
-  onChange: (v: boolean) => void;
-  label: string;
-}) {
-  const id = useId();
-  return (
-    <label htmlFor={id} className="flex cursor-pointer items-center justify-between gap-3 py-2.5">
-      <span className="text-sm font-medium text-foreground">{label}</span>
-      <button
-        id={id}
-        type="button"
-        role="switch"
-        aria-checked={checked}
-        onClick={() => onChange(!checked)}
-        className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border transition-colors focus:outline-none focus-visible:ring focus-visible:ring-primary/50 ${
-          checked ? "bg-primary border-primary" : "bg-muted border-border"
-        }`}
-      >
-        <span
-          className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform ${
-            checked ? "translate-x-4" : "translate-x-0.5"
-          }`}
-        />
-      </button>
-    </label>
-  );
-}
-
-// ─── Labelled text input ──────────────────────────────────────────────────────
-function Field({
-  label,
-  value,
-  onChange,
-  placeholder,
-  type = "text",
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  placeholder?: string;
-  type?: string;
-}) {
-  const id = useId();
-  return (
-    <div className="space-y-1">
-      <label htmlFor={id} className="block text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-        {label}
-      </label>
-      <input
-        id={id}
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="w-full border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
-      />
-    </div>
-  );
-}
-
-// ─── Card wrapper ─────────────────────────────────────────────────────────────
-function AdminCard({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="border border-border bg-card">
-      <div className="border-b border-border bg-muted/30 px-5 py-3">
-        <p className="text-xs font-bold uppercase tracking-[0.25em] text-foreground">{title}</p>
-      </div>
-      <div className="p-5">{children}</div>
-    </div>
-  );
-}
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 const ChapterAdminEditPage = () => {
@@ -153,7 +70,7 @@ const ChapterAdminEditPage = () => {
 
   // ── Section toggles ──────────────────────────────────────────────────────────
   const toggleSection = (key: keyof ChapterSections) => {
-    const next = !chapter.sections[key];
+    const next = chapter.sections[key] === false;
     updateSections(id, { [key]: next });
     setChapter((prev) =>
       prev ? { ...prev, sections: { ...prev.sections, [key]: next } } : prev,
@@ -321,32 +238,33 @@ const ChapterAdminEditPage = () => {
                   { key: "videoRow1", label: `Impact Reels — ${chapter.videoRow1.sectionTitle}` },
                   { key: "videoRow2", label: `Community Stories — ${chapter.videoRow2.sectionTitle}` },
                   { key: "gallery", label: `Gallery — ${chapter.gallery.sectionTitle}` },
+                  { key: "events", label: "Events & Initiatives (managed in Events admin)" },
                   { key: "awards", label: "Awards & Recognition" },
                 ] as { key: keyof ChapterSections; label: string }[]
               ).map(({ key, label }) => (
                 <div key={key} className="flex items-center justify-between gap-3 py-2.5">
                   <div className="flex items-center gap-2 text-sm">
-                    {chapter.sections[key] ? (
+                    {chapter.sections[key] !== false ? (
                       <Eye className="h-4 w-4 text-primary shrink-0" />
                     ) : (
                       <EyeOff className="h-4 w-4 text-muted-foreground shrink-0" />
                     )}
-                    <span className={chapter.sections[key] ? "text-foreground" : "text-muted-foreground"}>
+                    <span className={chapter.sections[key] !== false ? "text-foreground" : "text-muted-foreground"}>
                       {label}
                     </span>
                   </div>
                   <button
                     type="button"
                     role="switch"
-                    aria-checked={chapter.sections[key]}
+                    aria-checked={chapter.sections[key] !== false}
                     onClick={() => toggleSection(key)}
                     className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border transition-colors focus:outline-none focus-visible:ring focus-visible:ring-primary/50 ${
-                      chapter.sections[key] ? "bg-primary border-primary" : "bg-muted border-border"
+                      chapter.sections[key] !== false ? "bg-primary border-primary" : "bg-muted border-border"
                     }`}
                   >
                     <span
                       className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform ${
-                        chapter.sections[key] ? "translate-x-4" : "translate-x-0.5"
+                        chapter.sections[key] !== false ? "translate-x-4" : "translate-x-0.5"
                       }`}
                     />
                   </button>
@@ -373,19 +291,22 @@ const ChapterAdminEditPage = () => {
                 />
               </div>
               <div className="sm:col-span-2">
-                <Field
+                <MediaField
                   label="Video URL (MP4)"
                   value={fvSrc}
                   onChange={setFvSrc}
-                  placeholder="https://example.com/video.mp4"
+                  accept="video/mp4,video/*"
+                  folder={`chapters/${id}`}
+                  placeholder="https://example.com/video.mp4 or upload"
                 />
               </div>
               <div className="sm:col-span-2">
-                <Field
+                <MediaField
                   label="Poster / Thumbnail URL"
                   value={fvPoster}
                   onChange={setFvPoster}
-                  placeholder="https://example.com/thumb.jpg"
+                  folder={`chapters/${id}`}
+                  placeholder="https://example.com/thumb.jpg or upload"
                 />
               </div>
             </div>
@@ -449,10 +370,10 @@ const ChapterAdminEditPage = () => {
                     />
                   </div>
                   <div className="sm:col-span-2">
-                    <Field label="Video URL (MP4)" value={newVSrc} onChange={setNewVSrc} placeholder="https://... (leave blank for placeholder)" />
+                    <MediaField label="Video URL (MP4)" value={newVSrc} onChange={setNewVSrc} accept="video/mp4,video/*" folder={`chapters/${id}`} placeholder="https://... or upload (leave blank for placeholder)" />
                   </div>
                   <div className="sm:col-span-2">
-                    <Field label="Thumbnail URL" value={newVPoster} onChange={setNewVPoster} placeholder="https://..." />
+                    <MediaField label="Thumbnail URL" value={newVPoster} onChange={setNewVPoster} folder={`chapters/${id}`} />
                   </div>
                 </div>
                 <div className="flex gap-2 pt-1">
@@ -521,10 +442,10 @@ const ChapterAdminEditPage = () => {
                     />
                   </div>
                   <div className="sm:col-span-2">
-                    <Field label="Video URL (MP4)" value={newVSrc} onChange={setNewVSrc} placeholder="https://... (leave blank for placeholder)" />
+                    <MediaField label="Video URL (MP4)" value={newVSrc} onChange={setNewVSrc} accept="video/mp4,video/*" folder={`chapters/${id}`} placeholder="https://... or upload (leave blank for placeholder)" />
                   </div>
                   <div className="sm:col-span-2">
-                    <Field label="Thumbnail URL" value={newVPoster} onChange={setNewVPoster} placeholder="https://..." />
+                    <MediaField label="Thumbnail URL" value={newVPoster} onChange={setNewVPoster} folder={`chapters/${id}`} />
                   </div>
                 </div>
                 <div className="flex gap-2 pt-1">
@@ -589,7 +510,7 @@ const ChapterAdminEditPage = () => {
                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
                   Add Photo
                 </p>
-                <Field label="Image URL *" value={newImgSrc} onChange={setNewImgSrc} placeholder="https://..." />
+                <MediaField label="Image URL *" value={newImgSrc} onChange={setNewImgSrc} folder={`chapters/${id}`} />
                 <Field label="Alt Text" value={newImgAlt} onChange={setNewImgAlt} placeholder="Description for accessibility" />
                 <Field label="Caption (optional)" value={newImgCaption} onChange={setNewImgCaption} placeholder="Tree Plantation Drive — March 2024" />
                 <div className="flex gap-2 pt-1">
@@ -608,7 +529,7 @@ const ChapterAdminEditPage = () => {
                 className="flex items-center gap-2 border border-dashed border-border px-4 py-2 text-sm text-muted-foreground hover:border-primary/40 hover:text-foreground transition-colors w-full justify-center"
               >
                 <Plus className="h-4 w-4" />
-                Add Photo URL
+                Add Photo
               </button>
             )}
           </AdminCard>

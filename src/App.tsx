@@ -17,8 +17,12 @@ import ChapterDetailPage from "./pages/ChapterDetailPage.tsx";
 import ChaptersAdminPage from "./pages/ChaptersAdminPage.tsx";
 import ChapterAdminEditPage from "./pages/ChapterAdminEditPage.tsx";
 import PartnersPage from "./pages/PartnersPage.tsx";
+import HomeAdminPage from "./pages/HomeAdminPage.tsx";
+import PartnersAdminPage from "./pages/PartnersAdminPage.tsx";
+import EventsAdminPage from "./pages/EventsAdminPage.tsx";
 import ProjectsPage from "./pages/ProjectsPage.tsx";
 import ScrollToTop from "@/components/ScrollToTop";
+import HashScroller from "@/components/HashScroller";
 import GoogleTranslate from "@/components/GoogleTranslate";
 import ProtectedAdminRoute from "@/components/ProtectedAdminRoute";
 
@@ -31,6 +35,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <ScrollToTop />
+        <HashScroller />
         <GoogleTranslate />
         <Routes>
           <Route path="/" element={<Index />} />
@@ -50,6 +55,30 @@ const App = () => (
             element={
               <ProtectedAdminRoute>
                 <ChaptersAdminPage />
+              </ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path="/admin/home"
+            element={
+              <ProtectedAdminRoute>
+                <HomeAdminPage />
+              </ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path="/admin/partners"
+            element={
+              <ProtectedAdminRoute>
+                <PartnersAdminPage />
+              </ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path="/admin/events"
+            element={
+              <ProtectedAdminRoute>
+                <EventsAdminPage />
               </ProtectedAdminRoute>
             }
           />

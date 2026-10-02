@@ -1,6 +1,7 @@
 import vedPortrait from "@/assets/ved-portrait.jpg";
 import virPortrait from "@/assets/vir-portrait.jpg";
 import aravPortrait from "@/assets/arav-portrait-real.png";
+import kaavyaPortrait from "@/assets/kaavya-portrait-real.png";
 import balurghatVideoPoster from "@/assets/balurghat-video-poster.jpg";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -35,6 +36,7 @@ export interface ChapterSections {
   videoRow1: boolean;
   videoRow2: boolean;
   gallery: boolean;
+  events: boolean;
   awards: boolean;
 }
 
@@ -144,6 +146,7 @@ export const defaultChapters: ChapterData[] = [
       videoRow1: true,
       videoRow2: true,
       gallery: true,
+      events: true,
       awards: true,
     },
   },
@@ -161,7 +164,32 @@ export const defaultChapters: ChapterData[] = [
       "The journey extended beyond the traditional classroom to two Village Research Labs established by IKP in rural Haryana. Here, Project Zūl introduced students to the fundamentals of circuits, electronics and robotics through practical activities designed to encourage experimentation, problem-solving and curiosity.",
       "From training teachers remotely to building circuits with students in village labs, the Haryana chapter reflects Project Zūl's larger goal: making hands-on STEM learning accessible wherever students learn.",
     ],
-    lead: null,
+    lead: {
+      name: "Kaavya Majumder",
+      title: "Project Lead & Chapter Head",
+      bio: [
+        "Kaavya leads Project Zūl's programmes in Haryana, playing a key role in building its partnership with IKP and planning its activities, engagements and expansion into schools and village learning spaces. She has travelled to remote parts of Haryana to lead sessions, while working closely with teachers and students to gather feedback and use those insights to continually refine the curriculum and future sessions.",
+      ],
+      image: kaavyaPortrait,
+    },
+    leads: [
+      {
+        name: "Ved Hariharan",
+        title: "Chapter Head",
+        bio: [
+          "Ved helps implement Project Zūl's Haryana chapter, from training teachers through online sessions to travelling to remote schools and village labs for hands-on workshops. He focuses on making sessions interactive and accessible, using games and challenges to help students learn robotics through experimentation.",
+        ],
+        image: vedPortrait,
+      },
+      {
+        name: "Vir Hariharan",
+        title: "Chapter Head",
+        bio: [
+          "Vir works across Project Zūl's Haryana chapter, conducting teacher training and taking hands-on robotics sessions in schools and village labs across the state. He enjoys finding creative, gamified ways to turn circuits and robotics into experiences that keep students curious, involved and eager to build for themselves.",
+        ],
+        image: virPortrait,
+      },
+    ],
     stats: [
       { label: "Schools", value: "7" },
       { label: "Students", value: "3060+" },
@@ -207,6 +235,7 @@ export const defaultChapters: ChapterData[] = [
       videoRow1: true,
       videoRow2: true,
       gallery: true,
+      events: true,
       awards: true,
     },
   },
@@ -300,6 +329,7 @@ export const defaultChapters: ChapterData[] = [
       videoRow1: true,
       videoRow2: true,
       gallery: true,
+      events: true,
       awards: true,
     },
   },
@@ -315,7 +345,14 @@ export const defaultChapters: ChapterData[] = [
       "Through Arduino-based workshops, collaborative projects, and community engagement, the Mumbai chapter gives students the tools and mindset to move from passive learners to active creators. Every workshop is designed to be practical, collaborative, and tied to real challenges students see in their own communities.",
       "The chapter aspires to build a self-sustaining ecosystem of student innovators who mentor each other and inspire the next wave of change-makers in Maharashtra.",
     ],
-    lead: null,
+    lead: {
+      name: "Kaavya Majumder",
+      title: "Project Lead",
+      bio: [
+        "Kaavya leads Project Zūl's programmes in Mumbai, planning its outreach and partnerships while working with chapter members, teachers and NGOs to bring hands-on robotics learning to students across different communities. She has led sessions in Dharavi and the Mumbai suburbs, helping introduce the programme, understand community needs and establish partnerships with Masoom and Gyanoday, two NGOs now working with Project Zūl.",
+      ],
+      image: kaavyaPortrait,
+    },
     leads: [
       {
         name: "Ved Hariharan",
@@ -379,6 +416,7 @@ export const defaultChapters: ChapterData[] = [
       videoRow1: true,
       videoRow2: true,
       gallery: true,
+      events: true,
       awards: false,
     },
   },

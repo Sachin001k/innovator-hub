@@ -32,8 +32,13 @@ const HashScroller = () => {
       return;
     }
 
-    const timeout = setTimeout(() => tryScrollTo(id), 120);
-    return () => clearTimeout(timeout);
+    // Content such as events loads asynchronously, so keep trying for a few seconds
+    let attempts = 0;
+    const interval = setInterval(() => {
+      attempts += 1;
+      if (tryScrollTo(id) || attempts >= 30) clearInterval(interval);
+    }, 150);
+    return () => clearInterval(interval);
   }, [location.pathname, location.hash]);
 
   return null;

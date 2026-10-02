@@ -5,7 +5,9 @@ import { useParams, Link, Navigate } from "react-router-dom";
 import PageLayout from "@/components/PageLayout";
 import ImageViewer, { GalleryImage } from "@/components/ImageViewer";
 import VideoModal from "@/components/VideoModal";
+import ChapterEventsSection from "@/components/ChapterEventsSection";
 import { getChapter, getChapterAsync } from "@/lib/chaptersStore";
+import { useVisibleEvents } from "@/lib/siteContentStore";
 import type { ChapterData, ChapterVideo } from "@/data/chaptersData";
 
 // ── Reel card ─────────────────────────────────────────────────────────────────
@@ -63,6 +65,7 @@ const ChapterDetailPage = () => {
   const [chapter, setChapter] = useState(() => (id ? getChapter(id) : undefined));
   const [activeVideo, setActiveVideo] = useState<ChapterVideo | null>(null);
   const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
+  const chapterEvents = useVisibleEvents(id);
 
   useEffect(() => {
     if (!id) return;
@@ -154,14 +157,14 @@ const ChapterDetailPage = () => {
                   ))}
                 </div>
 
-                {/* Single chapter lead — shown below the story, aligned under the copy */}
-                {chapter.lead && !chapter.leads && (
+                {/* Main chapter lead — shown below the story, above any other leads */}
+                {chapter.lead && (
                   <div className="flex flex-col sm:flex-row gap-5 sm:gap-8 items-start border-t border-border pt-6">
                     {chapter.lead.image && (
                       <img
                         src={chapter.lead.image}
                         alt={chapter.lead.name}
-                        className="w-28 h-28 object-cover rounded-none shadow-lg shrink-0"
+                        className="w-28 h-28 object-cover object-top rounded-none shadow-lg shrink-0"
                         loading="lazy"
                       />
                     )}
@@ -188,7 +191,7 @@ const ChapterDetailPage = () => {
                         <img
                           src={lead.image}
                           alt={lead.name}
-                          className="w-28 h-28 object-cover object-top rounded-none shadow-lg shrink-0 grayscale hover:grayscale-0 transition-all duration-500"
+                          className="w-28 h-28 object-cover object-top rounded-none shadow-lg shrink-0"
                           loading="lazy"
                         />
                       )}
@@ -360,6 +363,9 @@ const ChapterDetailPage = () => {
           />
         </section>
       )}
+
+      {/* ── Events & Initiatives ── */}
+      {sections.events !== false && <ChapterEventsSection events={chapterEvents} />}
 
       {/* ── Awards ── */}
       {sections.awards && chapter.awards.length > 0 && (

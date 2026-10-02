@@ -1,53 +1,30 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
-import ImageViewer, { GalleryImage } from "@/components/ImageViewer";
-import wb1 from "@/assets/wb-photo-1.jpg";
-import wb2 from "@/assets/wb-photo-2.jpg";
-import wb3 from "@/assets/wb-photo-3.jpg";
-import wb4 from "@/assets/wb-photo-4.jpg";
-import kaavyaSasmo from "@/assets/kaavya-sasmo.jpg";
-import homeImagesRaw from "@/assets/home_images.txt?raw";
-import { parseUrlList } from "@/lib/parseUrlList";
-
-const chapterPhotoModules = import.meta.glob("/src/assets/chapters/*.{jpg,jpeg,png,webp}", {
-  eager: true,
-  import: "default",
-}) as Record<string, string>;
-
-const chapterCarouselImages: GalleryImage[] = Object.entries(chapterPhotoModules)
-  .sort(([a], [b]) => a.localeCompare(b))
-  .slice(0, 8)
-  .map(([, src], index) => ({ src, alt: `Chapter moment ${index + 1}` }));
-
-const remoteHomeCarouselImages: GalleryImage[] = parseUrlList(homeImagesRaw).map((src, index) => ({
-  src,
-  alt: `Home carousel image ${index + 1}`,
-}));
-
-const fallbackCarouselImages: GalleryImage[] = [
-  ...chapterCarouselImages,
-  { src: wb1, alt: "Regional chapter workshop in West Bengal" },
-  { src: wb2, alt: "Teacher training focused on robotics" },
-  { src: wb3, alt: "Students presenting their creative robots" },
-  { src: wb4, alt: "Large-scale community engagement event" },
-  { src: kaavyaSasmo, alt: "Chapter lead Kaavya at SASMO conference" },
-];
-
-const carouselImages: GalleryImage[] = remoteHomeCarouselImages.length ? remoteHomeCarouselImages : fallbackCarouselImages;
+import ImageViewer from "@/components/ImageViewer";
+import { useHomeContent } from "@/lib/siteContentStore";
 
 const HomeCarouselSection = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const { journeyImages: carouselImages } = useHomeContent();
 
-  const activeSlide = carouselImages[activeIndex];
+  const activeSlide = carouselImages[activeIndex % Math.max(carouselImages.length, 1)];
 
   useEffect(() => {
+    if (carouselImages.length < 2) return;
     const timer = setTimeout(() => {
       setActiveIndex((prev) => (prev + 1) % carouselImages.length);
     }, 4500);
     return () => clearTimeout(timer);
-  }, [activeIndex]);
+  }, [activeIndex, carouselImages.length]);
+
+  // Keep the index in range if the admin removes images
+  useEffect(() => {
+    if (activeIndex >= carouselImages.length) setActiveIndex(0);
+  }, [activeIndex, carouselImages.length]);
+
+  if (!activeSlide) return null;
 
   const handleNext = () => {
     setActiveIndex((prev) => (prev + 1) % carouselImages.length);
@@ -103,7 +80,7 @@ const HomeCarouselSection = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.98 }}
                 transition={{ duration: 0.6 }}
-                onClick={() => openLightbox(activeIndex)}
+                onClick={() => openLightbox(activeIndex % carouselImages.length)}
               />
             </AnimatePresence>
           </div>
@@ -126,14 +103,14 @@ const HomeCarouselSection = () => {
 
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
             <div className="md:hidden rounded-full border border-border bg-background/70 px-3 py-1 text-[11px] font-semibold text-foreground backdrop-blur">
-              {activeIndex + 1} / {carouselImages.length}
+              {(activeIndex % carouselImages.length) + 1} / {carouselImages.length}
             </div>
             <div className="hidden md:flex max-w-[90vw] items-center gap-2 overflow-x-auto px-2">
               {carouselImages.map((_, index) => (
                 <span
                   key={index}
                   className={`h-2 w-8 shrink-0 rounded-full transition-all ${
-                    index === activeIndex ? "bg-primary" : "bg-border/80"
+                    index === activeIndex % carouselImages.length ? "bg-primary" : "bg-border/80"
                   }`}
                 />
               ))}

@@ -36,9 +36,37 @@ const ChaptersAdminPage = () => {
             </h1>
             <p className="text-muted-foreground max-w-2xl">
               Select a chapter to edit its content, toggle section visibility, and manage
-              videos, photos, and awards. Changes are saved locally in your browser.
+              videos, photos, and awards. Images and videos can be uploaded directly or added by URL.
             </p>
           </motion.div>
+        </div>
+      </section>
+
+      {/* ── Site content ── */}
+      <section className="section-padding pb-0">
+        <div className="container mx-auto max-w-5xl space-y-4">
+          <p className="text-xs uppercase tracking-[0.3em] font-semibold text-muted-foreground">
+            Site Content
+          </p>
+          <div className="grid sm:grid-cols-3 gap-4">
+            {[
+              { to: "/admin/home", title: "Home Page", desc: "Impact numbers and journey carousel photos." },
+              { to: "/admin/partners", title: "Partners", desc: "Impact metrics and feedback quotes." },
+              { to: "/admin/events", title: "Events", desc: "Hackathons and initiatives — show or hide." },
+            ].map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                className="group flex items-center gap-3 border border-border bg-card p-5 hover:border-primary/40 transition-colors"
+              >
+                <div className="flex-1 space-y-1">
+                  <p className="font-heading text-lg font-bold uppercase tracking-wide">{item.title}</p>
+                  <p className="text-xs text-muted-foreground">{item.desc}</p>
+                </div>
+                <ArrowRight className="h-5 w-5 text-primary transition-transform duration-200 group-hover:translate-x-1" />
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -121,7 +149,7 @@ const ChaptersAdminPage = () => {
               {
                 icon: "👁️",
                 title: "Section Visibility",
-                desc: "Show or hide any section on a chapter page — About, Chapter Story, Video Rows, Gallery, Awards.",
+                desc: "Show or hide any section on a chapter page — About, Chapter Story, Video Rows, Gallery, Events, Awards.",
               },
               {
                 icon: "🎬",

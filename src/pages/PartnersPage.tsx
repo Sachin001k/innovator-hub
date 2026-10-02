@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
 import { Quote, MapPin, ExternalLink } from "lucide-react";
 import PageLayout from "@/components/PageLayout";
-import { defaultPartners, type Partner } from "@/data/partnersData";
+import type { Partner } from "@/data/partnersData";
+import { usePartners } from "@/lib/siteContentStore";
 
 const PartnerCard = ({ partner, index }: { partner: Partner; index: number }) => (
   <motion.div
@@ -98,7 +99,10 @@ const PartnerCard = ({ partner, index }: { partner: Partner; index: number }) =>
   </motion.div>
 );
 
-const PartnersPage = () => (
+const PartnersPage = () => {
+  const { partners } = usePartners();
+
+  return (
   <PageLayout>
     {/* Hero */}
     <section className="section-padding border-b border-border">
@@ -122,12 +126,13 @@ const PartnersPage = () => (
     {/* Partner list */}
     <section className="section-padding">
       <div className="container mx-auto max-w-5xl space-y-8">
-        {defaultPartners.map((partner, i) => (
+        {partners.map((partner, i) => (
           <PartnerCard key={partner.id} partner={partner} index={i} />
         ))}
       </div>
     </section>
   </PageLayout>
-);
+  );
+};
 
 export default PartnersPage;
